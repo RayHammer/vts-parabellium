@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3 uid="uid://6uafrxxswsc1"]
+
+[ext_resource type="Script" path="res://UI.gd" id="1_04aos"]
+[ext_resource type="Script" path="res://ColorField.gd" id="2_rr15g"]
+
+[node name="UI" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_04aos")
+
+[node name="CustomShirt" type="VBoxContainer" parent="."]
+layout_mode = 2
+script = ExtResource("2_rr15g")
+
+[node name="Label" type="Label" parent="CustomShirt"]
+layout_mode = 2
+text = "Shirt"
+
+[node name="ColorPicker" type="ColorPicker" parent="CustomShirt"]
+layout_mode = 2
+color = Color(0.223529, 0.203922, 0.211765, 1)
+edit_alpha = false
+
+[node name="CustomLines" type="VBoxContainer" parent="."]
+layout_mode = 2
+script = ExtResource("2_rr15g")
+
+[node name="Label" type="Label" parent="CustomLines"]
+layout_mode = 2
+text = "Lines"
+
+[node name="ColorPicker" type="ColorPicker" parent="CustomLines"]
+layout_mode = 2
+color = Color(0.94902, 0.341176, 0.588235, 1)
+edit_alpha = false
+
+[connection signal="color_changed" from="CustomShirt/ColorPicker" to="CustomShirt" method="_on_color_changed"]
