@@ -1,6 +1,6 @@
 extends "res://TrackedField.gd"
 
-@export var update_time = 1.0 / 30
+@export var update_time = 1.0 / 10
 var update_time_left = update_time
 var color_picker
 
