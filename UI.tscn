@@ -1,57 +1,84 @@
-[gd_scene load_steps=3 format=3 uid="uid://6uafrxxswsc1"]
+[gd_scene load_steps=4 format=3 uid="uid://c62ylihiwbnfk"]
 
 [ext_resource type="Script" path="res://UI.gd" id="1_04aos"]
-[ext_resource type="Script" path="res://ColorField.gd" id="2_rr15g"]
+[ext_resource type="PackedScene" uid="uid://7ajl3kj8s06f" path="res://ColorField.tscn" id="2_fe4vd"]
+[ext_resource type="Script" path="res://RPS.gd" id="3_k0a5t"]
 
-[node name="UI" type="HBoxContainer"]
-offset_right = 788.0
-offset_bottom = 598.0
+[node name="UI" type="Control" node_paths=PackedStringArray("status_bar", "log_window", "rps")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_04aos")
-verbose = false
-metadata/_edit_use_anchors_ = true
+status_bar = NodePath("StatusBar")
+log_window = NodePath("FieldContainer/ScrollContainer/VBoxContainer/LogWindow")
+rps = NodePath("FieldContainer/ScrollContainer/VBoxContainer/RPS")
 
-[node name="CustomShirt" type="VBoxContainer" parent="."]
+[node name="FieldContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
-script = ExtResource("2_rr15g")
+offset_right = 800.0
+offset_bottom = 598.0
 
-[node name="Label" type="Label" parent="CustomShirt"]
+[node name="CustomShirt" parent="FieldContainer" instance=ExtResource("2_fe4vd")]
 layout_mode = 2
-text = "Shirt"
+label_name = "Shirt"
+default_color = Color(0.223529, 0.203922, 0.211765, 1)
 
-[node name="ColorPicker" type="ColorPicker" parent="CustomShirt"]
+[node name="CustomLines" parent="FieldContainer" instance=ExtResource("2_fe4vd")]
 layout_mode = 2
-color = Color(0.223529, 0.203922, 0.211765, 1)
-edit_alpha = false
+label_name = "Lines"
+default_color = Color(0.94902, 0.341176, 0.588235, 1)
 
-[node name="RainbowCheck" type="CheckButton" parent="CustomShirt"]
+[node name="ScrollContainer" type="ScrollContainer" parent="FieldContainer"]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-text = "Rainbow"
 
-[node name="CustomLines" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="FieldContainer/ScrollContainer"]
 layout_mode = 2
-script = ExtResource("2_rr15g")
+size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="CustomLines"]
+[node name="Button" type="Button" parent="FieldContainer/ScrollContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
-text = "Lines"
+disabled = true
+text = "Reconnect"
 
-[node name="ColorPicker" type="ColorPicker" parent="CustomLines"]
+[node name="RPS" type="HBoxContainer" parent="FieldContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
-color = Color(0.94902, 0.341176, 0.588235, 1)
-edit_alpha = false
+script = ExtResource("3_k0a5t")
 
-[node name="RainbowCheck" type="CheckButton" parent="CustomLines"]
+[node name="Label" type="Label" parent="FieldContainer/ScrollContainer/VBoxContainer/RPS"]
 layout_mode = 2
-text = "Rainbow"
+size_flags_horizontal = 3
+text = "RPS"
 
-[node name="TextEdit" type="TextEdit" parent="."]
-custom_minimum_size = Vector2(200, 500)
+[node name="Value" type="LineEdit" parent="FieldContainer/ScrollContainer/VBoxContainer/RPS"]
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
+size_flags_horizontal = 8
+placeholder_text = "9999"
+alignment = 2
 editable = false
 
-[connection signal="color_changed" from="CustomShirt/ColorPicker" to="CustomShirt" method="_on_color_changed"]
-[connection signal="toggled" from="CustomShirt/RainbowCheck" to="CustomShirt" method="_on_rainbow_toggled"]
-[connection signal="color_changed" from="CustomLines/ColorPicker" to="CustomLines" method="_on_color_changed"]
-[connection signal="toggled" from="CustomLines/RainbowCheck" to="CustomLines" method="_on_rainbow_check_toggled"]
+[node name="Timer" type="Timer" parent="FieldContainer/ScrollContainer/VBoxContainer/RPS"]
+autostart = true
+
+[node name="LogWindow" type="TextEdit" parent="FieldContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 400)
+layout_mode = 2
+size_flags_vertical = 3
+editable = false
+
+[node name="StatusBar" type="LineEdit" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 800.0
+grow_vertical = 0
+editable = false
+virtual_keyboard_enabled = false
+
+[connection signal="timeout" from="FieldContainer/ScrollContainer/VBoxContainer/RPS/Timer" to="FieldContainer/ScrollContainer/VBoxContainer/RPS" method="_on_timer_timeout"]

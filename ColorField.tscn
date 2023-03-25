@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://7ajl3kj8s06f"]
+
+[ext_resource type="Script" path="res://ColorField.gd" id="1_af6yk"]
+
+[node name="ColorField" type="VBoxContainer"]
+script = ExtResource("1_af6yk")
+default_color = null
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Label"
+
+[node name="ColorPicker" type="ColorPicker" parent="."]
+layout_mode = 2
+color = Color(0.223529, 0.203922, 0.211765, 1)
+edit_alpha = false
+
+[node name="RainbowCheck" type="CheckButton" parent="."]
+layout_mode = 2
+text = "Rainbow"
+
+[node name="RainbowSpeed" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RainbowSpeed"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Rainbow Speed"
+text_overrun_behavior = 1
+
+[node name="Value" type="SpinBox" parent="RainbowSpeed"]
+layout_mode = 2
+min_value = -100.0
+step = 0.01
+value = 1.0
+
+[connection signal="color_changed" from="ColorPicker" to="." method="_on_color_changed"]
+[connection signal="toggled" from="RainbowCheck" to="." method="_on_rainbow_toggled"]

@@ -4,9 +4,14 @@ enum PluginState {
 	_SIZE
 }
 
+@export var status_bar: LineEdit
+@export var log_window: TextEdit
+@export var rps: RPS
+@export var reconnect_button: Button
+
 @export var websocket_url = "ws://localhost:8001"
 @export var config_path = "user://config.cfg"
-@export var verbose = true
+@export var verbose = false
 
 var plugin_name = "Parabellium"
 var plugin_developer = "RayHammer"
@@ -20,28 +25,32 @@ var _request_base = {
 
 var _socket = WebSocketPeer.new()
 var _token = ""
-var _once = true
+var _connect_requested = true
+var _root: SceneTree
 
 func _ready():
+	log_window.text = ""
+	status_bar.text = ""
+	_root = get_tree()
 	var config = ConfigFile.new()
 	if config.load(config_path) == OK:
-		for node in get_children():
-			if node.is_in_group("TrackedFields"):
-				node.read_config(config)
-				pass
+		_token = config.get_value("Global", "token", "")
+		for node in _root.get_nodes_in_group("TrackedFields"):
+			node.read_config(config)
+			pass
 	_socket.connect_to_url(websocket_url)
 	pass
 
-func _process(_delta):
+func _physics_process(_delta):
 	_socket.poll()
 	var state = _socket.get_ready_state()
 	match state:
 		WebSocketPeer.STATE_OPEN:
-			if _once:
+			if _connect_requested:
 				var request = _request_base.duplicate()
 				request["messageType"] = "APIStateRequest"
 				_socket.send_text(JSON.stringify(request))
-				_once = false
+				_connect_requested = false
 			while _socket.get_available_packet_count():
 				var packet = _socket.get_packet()
 				parse_response(packet.get_string_from_utf8())
@@ -54,11 +63,17 @@ func _process(_delta):
 				print("WebSocket closed with code: %d, reason: %s. Clean: %s" % [code, reason, code != -1])
 	pass
 
-func _exit_tree():
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_config()
+		#get_tree().quit()
+	pass
+
+func save_config():
 	var config = ConfigFile.new()
-	for node in get_children():
-		if node.is_in_group("TrackedFields"):
-			node.write_config(config)
+	config.set_value("Global", "token", _token)
+	for node in _root.get_nodes_in_group("TrackedFields"):
+		node.write_config(config)
 	config.save(config_path)
 	pass
 
@@ -80,14 +95,17 @@ func parse_response(response):
 			"AuthenticationResponse":
 				if json["data"]["authenticated"] == true:
 					add_custom_params()
+				else:
+					_token = ""
+					get_token()
 			"ParameterCreationResponse":
-				print(json["data"]["parameterName"], " is live!")
+				add_log(json["data"]["parameterName"] + " is live!")
 			"InjectParameterDataResponse":
-				#send_request(new_request("ParameterValueRequest", {"name": "CustomShirtR"}))
 				pass
 			"ParameterValueResponse":
 				pass
 			"APIError":
+				add_log(json["data"]["message"])
 				print(json)
 	pass
 
@@ -98,9 +116,16 @@ func new_request(type: String, data: Dictionary) -> Dictionary:
 	return request
 
 func send_request(request: Variant):
+	rps.increment()
 	_socket.send_text(JSON.stringify(request))
 
+func add_log(text):
+	#log_window.set_line(log_window.get_line_count(), text)
+	log_window.text += text + "\n"
+	pass
+
 func get_token():
+	status_bar.text = "Retrieving auth token"
 	var request = new_request("AuthenticationTokenRequest", {
 		"pluginName": plugin_name,
 		"pluginDeveloper": plugin_developer
@@ -109,7 +134,7 @@ func get_token():
 	pass
 
 func authenticate():
-	print("Begin authentication")
+	status_bar.text = "Authorizing"
 	var request = new_request("AuthenticationRequest", {
 		"pluginName": plugin_name,
 		"pluginDeveloper": plugin_developer,
@@ -119,15 +144,15 @@ func authenticate():
 	pass
 
 func add_custom_params():
-	print("Adding custom parameters")
-	for node in get_children():
-		if node.is_in_group("TrackedFields"):
-			for param in node.get_parameter_data():
-				var request = new_request("ParameterCreationRequest", param)
-				#print("Sent: ", JSON.stringify(request))
-				send_request(request)
+	status_bar.text = "Adding custom parameters"
+	for node in _root.get_nodes_in_group("TrackedFields"):
+		for param in node.get_parameter_data():
+			var request = new_request("ParameterCreationRequest", param)
+			send_request(request)
+			if !node.set_parameters.is_connected(set_parameters):
 				node.set_parameters.connect(set_parameters)
-				pass
+			pass
+	status_bar.text = "Ready"
 	pass
 
 func set_parameters(data: Array):
