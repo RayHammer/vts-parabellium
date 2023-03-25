@@ -17,3 +17,9 @@ func _process(_delta):
 
 func get_parameter_data() -> Array:
 	return []
+
+func read_config(_config: ConfigFile):
+	pass
+
+func write_config(_config: ConfigFile):
+	pass

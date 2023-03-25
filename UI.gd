@@ -5,6 +5,7 @@ enum PluginState {
 }
 
 @export var websocket_url = "ws://localhost:8001"
+@export var config_path = "user://config.cfg"
 @export var verbose = true
 
 var plugin_name = "Parabellium"
@@ -22,8 +23,14 @@ var _token = ""
 var _once = true
 
 func _ready():
+	var config = ConfigFile.new()
+	if config.load(config_path) == OK:
+		for node in get_children():
+			if node.is_in_group("TrackedFields"):
+				node.read_config(config)
+				pass
 	_socket.connect_to_url(websocket_url)
-	pass # Replace with function body.
+	pass
 
 func _process(_delta):
 	_socket.poll()
@@ -43,7 +50,16 @@ func _process(_delta):
 		WebSocketPeer.STATE_CLOSED:
 			var code = _socket.get_close_code()
 			var reason = _socket.get_close_reason()
-			print("WebSocket closed with code: %d, reason: %s. Clean: %s" % [code, reason, code != -1])
+			if verbose:
+				print("WebSocket closed with code: %d, reason: %s. Clean: %s" % [code, reason, code != -1])
+	pass
+
+func _exit_tree():
+	var config = ConfigFile.new()
+	for node in get_children():
+		if node.is_in_group("TrackedFields"):
+			node.write_config(config)
+	config.save(config_path)
 	pass
 
 func parse_response(response):
@@ -105,7 +121,6 @@ func authenticate():
 func add_custom_params():
 	print("Adding custom parameters")
 	for node in get_children():
-		#print("Found node: ", node.name, ", class name: ", node.get_class())
 		if node.is_in_group("TrackedFields"):
 			for param in node.get_parameter_data():
 				var request = new_request("ParameterCreationRequest", param)

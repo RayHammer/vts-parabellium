@@ -2,9 +2,9 @@ extends "res://TrackedField.gd"
 
 @export var update_time = 1.0 / 10
 var update_time_left = update_time
+var is_rainbow = false
 var color_picker
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	super()
 	color_picker = get_node("ColorPicker")
@@ -12,11 +12,11 @@ func _ready():
 	parameters[name + "R"] = color.r8
 	parameters[name + "G"] = color.g8
 	parameters[name + "B"] = color.b8
-	pass # Replace with function body.
+	pass
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if is_rainbow:
+		color_picker.color.h = wrapf(color_picker.color.h + delta, 0, 1)
 	update_time_left = min(0, update_time_left - delta)
 	if update_time_left <= 0:
 		_on_color_changed(color_picker.color)
@@ -34,6 +34,22 @@ func get_parameter_data() -> Array:
 		})
 	return output
 
+func read_config(config):
+	var data = JSON.parse_string(config.get_value(name, "presets"))
+	for i in data:
+		color_picker.add_preset(Color(i))
+	pass
+
+func write_config(config):
+	var presets = color_picker.get_presets()
+	var data = []
+	for i in presets:
+		data.append(i.to_html(false))
+	config.set_value(name, "presets", JSON.stringify(data))
+	pass
+
+func _on_rainbow_toggled(state: bool):
+	is_rainbow = state
 
 func _on_color_changed(color):
 	set_parameters.emit([

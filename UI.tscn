@@ -4,12 +4,11 @@
 [ext_resource type="Script" path="res://ColorField.gd" id="2_rr15g"]
 
 [node name="UI" type="HBoxContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 788.0
+offset_bottom = 598.0
 script = ExtResource("1_04aos")
+verbose = false
+metadata/_edit_use_anchors_ = true
 
 [node name="CustomShirt" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -24,6 +23,10 @@ layout_mode = 2
 color = Color(0.223529, 0.203922, 0.211765, 1)
 edit_alpha = false
 
+[node name="RainbowCheck" type="CheckButton" parent="CustomShirt"]
+layout_mode = 2
+text = "Rainbow"
+
 [node name="CustomLines" type="VBoxContainer" parent="."]
 layout_mode = 2
 script = ExtResource("2_rr15g")
@@ -37,5 +40,18 @@ layout_mode = 2
 color = Color(0.94902, 0.341176, 0.588235, 1)
 edit_alpha = false
 
+[node name="RainbowCheck" type="CheckButton" parent="CustomLines"]
+layout_mode = 2
+text = "Rainbow"
+
+[node name="TextEdit" type="TextEdit" parent="."]
+custom_minimum_size = Vector2(200, 500)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+editable = false
+
 [connection signal="color_changed" from="CustomShirt/ColorPicker" to="CustomShirt" method="_on_color_changed"]
+[connection signal="toggled" from="CustomShirt/RainbowCheck" to="CustomShirt" method="_on_rainbow_toggled"]
 [connection signal="color_changed" from="CustomLines/ColorPicker" to="CustomLines" method="_on_color_changed"]
+[connection signal="toggled" from="CustomLines/RainbowCheck" to="CustomLines" method="_on_rainbow_check_toggled"]
