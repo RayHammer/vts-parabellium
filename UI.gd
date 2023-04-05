@@ -44,6 +44,7 @@ func _ready():
 		for node in _root.get_nodes_in_group("TrackedFields"):
 			node.read_config(config)
 			pass
+	status_bar.text = "Establishing connection"
 	_socket.connect_to_url(websocket_url)
 	pass
 
@@ -53,9 +54,9 @@ func _physics_process(_delta):
 	match state:
 		WebSocketPeer.STATE_OPEN:
 			if _connect_requested:
-				var request = _request_base.duplicate()
-				request["messageType"] = "APIStateRequest"
-				_socket.send_text(JSON.stringify(request))
+				status_bar.text = "Retrieving API state"
+				var request = new_request("APIStateRequest", {})
+				send_request(request)
 				_connect_requested = false
 			while _socket.get_available_packet_count():
 				var packet = _socket.get_packet()
