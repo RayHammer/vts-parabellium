@@ -8,6 +8,8 @@ enum PluginState {
 @export var log_window: TextEdit
 @export var rps: RPS
 @export var reconnect_button: Button
+@export var update_time_cap: SpinBox
+@export var update_timer: Timer
 
 @export var websocket_url = "ws://localhost:8001"
 @export var config_path = "user://config.cfg"
@@ -27,8 +29,12 @@ var _socket = WebSocketPeer.new()
 var _token = ""
 var _connect_requested = true
 var _root: SceneTree
+var _queued_data: Dictionary = {}
 
 func _ready():
+	set_update_cap(update_time_cap.value)
+	if !update_time_cap.value_changed.is_connected(set_update_cap):
+		update_time_cap.value_changed.connect(set_update_cap)
 	log_window.text = ""
 	status_bar.text = ""
 	_root = get_tree()
@@ -116,6 +122,8 @@ func new_request(type: String, data: Dictionary) -> Dictionary:
 	return request
 
 func send_request(request: Variant):
+	if verbose:
+		print("Sent: ", request)
 	rps.increment()
 	_socket.send_text(JSON.stringify(request))
 
@@ -149,16 +157,31 @@ func add_custom_params():
 		for param in node.get_parameter_data():
 			var request = new_request("ParameterCreationRequest", param)
 			send_request(request)
-			if !node.set_parameters.is_connected(set_parameters):
-				node.set_parameters.connect(set_parameters)
+			if !node.set_parameters.is_connected(queue_parameters):
+				node.set_parameters.connect(queue_parameters)
 			pass
 	status_bar.text = "Ready"
 	pass
 
-func set_parameters(data: Array):
+func set_update_cap(value: float):
+	update_timer.wait_time = 1.0 / value
+
+func queue_parameters(data: Dictionary):
+	_queued_data.merge(data, true)
+
+func set_parameters():
+	if _queued_data.is_empty():
+		return
+	var parsed_data = []
+	for id in _queued_data:
+		parsed_data.push_back({
+			"id": id,
+			"value": _queued_data[id]
+		})
+	_queued_data.clear()
 	var request = new_request("InjectParameterDataRequest", {
 		"mode": "set",
-		"parameterValues": data
+		"parameterValues": parsed_data
 	})
 	send_request(request)
 

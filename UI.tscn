@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://7ajl3kj8s06f" path="res://ColorField.tscn" id="2_fe4vd"]
 [ext_resource type="Script" path="res://RPS.gd" id="3_k0a5t"]
 
-[node name="UI" type="Control" node_paths=PackedStringArray("status_bar", "log_window", "rps")]
+[node name="UI" type="Control" node_paths=PackedStringArray("status_bar", "log_window", "rps", "reconnect_button", "update_time_cap", "update_timer")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,6 +15,9 @@ script = ExtResource("1_04aos")
 status_bar = NodePath("StatusBar")
 log_window = NodePath("FieldContainer/ScrollContainer/VBoxContainer/LogWindow")
 rps = NodePath("FieldContainer/ScrollContainer/VBoxContainer/RPS")
+reconnect_button = NodePath("FieldContainer/ScrollContainer/VBoxContainer/ReconnectButton")
+update_time_cap = NodePath("FieldContainer/ScrollContainer/VBoxContainer/UpdateTimeCap/Value")
+update_timer = NodePath("UpdateTimer")
 
 [node name="FieldContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -39,7 +42,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Button" type="Button" parent="FieldContainer/ScrollContainer/VBoxContainer"]
+[node name="ReconnectButton" type="Button" parent="FieldContainer/ScrollContainer/VBoxContainer"]
 visible = false
 layout_mode = 2
 disabled = true
@@ -64,6 +67,20 @@ editable = false
 [node name="Timer" type="Timer" parent="FieldContainer/ScrollContainer/VBoxContainer/RPS"]
 autostart = true
 
+[node name="UpdateTimeCap" type="HBoxContainer" parent="FieldContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="FieldContainer/ScrollContainer/VBoxContainer/UpdateTimeCap"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Max Update Rate"
+
+[node name="Value" type="SpinBox" parent="FieldContainer/ScrollContainer/VBoxContainer/UpdateTimeCap"]
+layout_mode = 2
+min_value = 1.0
+max_value = 60.0
+value = 20.0
+
 [node name="LogWindow" type="TextEdit" parent="FieldContainer/ScrollContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 400)
 layout_mode = 2
@@ -81,4 +98,9 @@ grow_vertical = 0
 editable = false
 virtual_keyboard_enabled = false
 
+[node name="UpdateTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
 [connection signal="timeout" from="FieldContainer/ScrollContainer/VBoxContainer/RPS/Timer" to="FieldContainer/ScrollContainer/VBoxContainer/RPS" method="_on_timer_timeout"]
+[connection signal="timeout" from="UpdateTimer" to="." method="set_parameters"]

@@ -1,6 +1,6 @@
 extends Control
 
-signal set_parameters(array)
+signal set_parameters(data: Dictionary)
 
 var parameters = {}
 

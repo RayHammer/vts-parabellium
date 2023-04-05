@@ -1,6 +1,10 @@
 @tool
 extends "res://TrackedField.gd"
 
+@export var update_timer: Timer
+@export var rainbow_speed_spinbox: SpinBox
+@export var color_picker: ColorPicker
+
 @export var label_name: String :
 	set(value):
 		label_name = value
@@ -14,19 +18,13 @@ extends "res://TrackedField.gd"
 @export var update_time_idle = 1.0 / 5
 @export var update_time_rainbow = 1.0 / 30
 
-var update_time = update_time_idle
-var rainbow_speed_spinbox
-var update_time_left = update_time
 var is_rainbow = false
-var color_picker
 
 func _ready():
-	update_time = update_time_idle
 	if Engine.is_editor_hint():
 		return
 	super()
-	color_picker = get_node("ColorPicker")
-	rainbow_speed_spinbox = get_node("RainbowSpeed/Value")
+	update_timer.wait_time = update_time_idle
 	var color = color_picker.color
 	parameters[name + "R"] = color.r8
 	parameters[name + "G"] = color.g8
@@ -39,13 +37,9 @@ func _physics_process(delta):
 	if is_rainbow:
 		var speed = rainbow_speed_spinbox.value
 		color_picker.color.h = wrapf(color_picker.color.h + delta * speed, 0, 1)
-		update_time = update_time_rainbow
+		update_timer.wait_time = update_time_rainbow
 	else:
-		update_time = update_time_idle
-	update_time_left = max(0, update_time_left - delta)
-	if update_time_left <= 0:
-		_on_color_changed(color_picker.color)
-		update_time_left = update_time
+		update_timer.wait_time = update_time_idle
 	pass
 
 func get_parameter_data() -> Array:
@@ -75,22 +69,16 @@ func write_config(config):
 	config.set_value(name, "presets", JSON.stringify(data))
 	pass
 
+func update_color():
+	_on_color_changed(color_picker.color)
+
 func _on_rainbow_toggled(state: bool):
 	is_rainbow = state
 
 func _on_color_changed(color):
-	set_parameters.emit([
-		{
-			"id": name + "R",
-			"value": color.r8
-		},
-		{
-			"id": name + "G",
-			"value": color.g8
-		},
-		{
-			"id": name + "B",
-			"value": color.b8
-		},
-	])
+	set_parameters.emit({
+		name + "R": color.r8,
+		name + "G": color.g8,
+		name + "B": color.b8
+	})
 	pass

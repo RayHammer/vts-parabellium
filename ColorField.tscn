@@ -2,9 +2,11 @@
 
 [ext_resource type="Script" path="res://ColorField.gd" id="1_af6yk"]
 
-[node name="ColorField" type="VBoxContainer"]
+[node name="ColorField" type="VBoxContainer" node_paths=PackedStringArray("update_timer", "rainbow_speed_spinbox", "color_picker")]
 script = ExtResource("1_af6yk")
-default_color = null
+update_timer = NodePath("UpdateTimer")
+rainbow_speed_spinbox = NodePath("RainbowSpeed/Value")
+color_picker = NodePath("ColorPicker")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 2
@@ -34,5 +36,9 @@ min_value = -100.0
 step = 0.01
 value = 1.0
 
+[node name="UpdateTimer" type="Timer" parent="."]
+autostart = true
+
 [connection signal="color_changed" from="ColorPicker" to="." method="_on_color_changed"]
 [connection signal="toggled" from="RainbowCheck" to="." method="_on_rainbow_toggled"]
+[connection signal="timeout" from="UpdateTimer" to="." method="update_color"]
