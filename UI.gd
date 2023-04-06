@@ -32,18 +32,20 @@ var _root: SceneTree
 var _queued_data: Dictionary = {}
 
 func _ready():
-	set_update_cap(update_time_cap.value)
-	if !update_time_cap.value_changed.is_connected(set_update_cap):
-		update_time_cap.value_changed.connect(set_update_cap)
 	log_window.text = ""
 	status_bar.text = ""
 	_root = get_tree()
 	var config = ConfigFile.new()
 	if config.load(config_path) == OK:
 		_token = config.get_value("Global", "token", "")
+		update_time_cap.value = config.get_value("Global", "ups_cap", 10)
 		for node in _root.get_nodes_in_group("TrackedFields"):
 			node.read_config(config)
 			pass
+	set_update_cap(update_time_cap.value)
+	if !update_time_cap.value_changed.is_connected(set_update_cap):
+		update_time_cap.value_changed.connect(set_update_cap)
+
 	status_bar.text = "Establishing connection"
 	_socket.connect_to_url(websocket_url)
 	pass
@@ -79,6 +81,7 @@ func _notification(what):
 func save_config():
 	var config = ConfigFile.new()
 	config.set_value("Global", "token", _token)
+	config.set_value("Global", "ups_cap", update_time_cap.value)
 	for node in _root.get_nodes_in_group("TrackedFields"):
 		node.write_config(config)
 	config.save(config_path)
