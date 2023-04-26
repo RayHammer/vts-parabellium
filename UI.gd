@@ -11,7 +11,7 @@ enum PluginState {
 @export var update_time_cap: SpinBox
 @export var update_timer: Timer
 
-@export var websocket_url = "ws://localhost:8001"
+@export var websocket_url = "ws://127.0.0.1:8001"
 @export var config_path = "user://config.cfg"
 @export var verbose = false
 
