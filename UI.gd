@@ -34,6 +34,7 @@ var _queued_data: Dictionary = {}
 func _ready():
 	log_window.text = ""
 	status_bar.text = ""
+	# debug_info_toggle(false)
 	_root = get_tree()
 	var config = ConfigFile.new()
 	if config.load(config_path) == OK:
@@ -189,3 +190,7 @@ func set_parameters():
 	})
 	send_request(request)
 
+func debug_info_toggle(button_pressed: bool):
+	pass
+	rps.visible = button_pressed
+	log_window.visible = button_pressed

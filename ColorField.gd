@@ -59,6 +59,7 @@ func read_config(config):
 	if json.parse(config.get_value(name, "presets", "")) == OK:
 		for i in json.data:
 			color_picker.add_preset(Color(i))
+		rainbow_speed_spinbox.value = config.get_value(name, "rainbow_speed", 1)
 	pass
 
 func write_config(config):
@@ -67,6 +68,7 @@ func write_config(config):
 	for i in presets:
 		data.append(i.to_html(false))
 	config.set_value(name, "presets", JSON.stringify(data))
+	config.set_value(name, "rainbow_speed", rainbow_speed_spinbox.value)
 	pass
 
 func update_color():
