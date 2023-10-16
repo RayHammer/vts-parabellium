@@ -1,32 +1,30 @@
-[gd_scene load_steps=5 format=3 uid="uid://c62ylihiwbnfk"]
+[gd_scene load_steps=6 format=3 uid="uid://c62ylihiwbnfk"]
 
 [ext_resource type="Script" path="res://UI.gd" id="1_04aos"]
+[ext_resource type="Theme" uid="uid://cxpqisffa3rj1" path="res://ui.theme" id="1_c0833"]
 [ext_resource type="PackedScene" uid="uid://7ajl3kj8s06f" path="res://ColorField.tscn" id="2_fe4vd"]
 [ext_resource type="Script" path="res://TaskMenu.gd" id="2_hfgal"]
 [ext_resource type="Script" path="res://RPS.gd" id="3_k0a5t"]
 
-[node name="UI" type="Control" node_paths=PackedStringArray("status_bar", "log_window", "rps", "reconnect_button", "update_time_cap", "update_timer")]
-layout_mode = 3
+[node name="UI" type="ScrollContainer" node_paths=PackedStringArray("status_bar", "log_window", "rps", "reconnect_button", "update_time_cap", "update_timer")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_c0833")
 script = ExtResource("1_04aos")
 status_bar = NodePath("VBoxContainer/StatusBar")
 log_window = NodePath("VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/LogWindow")
 rps = NodePath("VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/RPS")
 reconnect_button = NodePath("VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/ReconnectButton")
 update_time_cap = NodePath("VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/UpdateTimeCap/Value")
-update_timer = NodePath("UpdateTimer")
+update_timer = NodePath("VBoxContainer/UpdateTimer")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="TaskMenu" type="MenuBar" parent="VBoxContainer" node_paths=PackedStringArray("debug_menu", "debug_info")]
 layout_mode = 2
@@ -42,6 +40,7 @@ item_0/id = 0
 
 [node name="FieldContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 0
 size_flags_vertical = 3
 
 [node name="CustomShirt" parent="VBoxContainer/FieldContainer" instance=ExtResource("2_fe4vd")]
@@ -55,12 +54,19 @@ label_name = "Lines"
 default_color = Color(0.94902, 0.341176, 0.588235, 1)
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/FieldContainer"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/FieldContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="HSlider" type="HSlider" parent="VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+min_value = 50.0
+max_value = 200.0
+value = 100.0
 
 [node name="ReconnectButton" type="Button" parent="VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer"]
 visible = false
@@ -102,20 +108,19 @@ max_value = 60.0
 value = 20.0
 
 [node name="LogWindow" type="TextEdit" parent="VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 400)
 layout_mode = 2
 size_flags_vertical = 3
 editable = false
 
 [node name="StatusBar" type="LineEdit" parent="VBoxContainer"]
 layout_mode = 2
+placeholder_text = "Status Bar"
 editable = false
 virtual_keyboard_enabled = false
 
-[node name="UpdateTimer" type="Timer" parent="."]
+[node name="UpdateTimer" type="Timer" parent="VBoxContainer"]
 wait_time = 0.05
 autostart = true
 
 [connection signal="id_pressed" from="VBoxContainer/TaskMenu/Debug" to="VBoxContainer/TaskMenu" method="debug_id_pressed"]
 [connection signal="timeout" from="VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/RPS/Timer" to="VBoxContainer/FieldContainer/ScrollContainer/VBoxContainer/RPS" method="_on_timer_timeout"]
-[connection signal="timeout" from="UpdateTimer" to="." method="set_parameters"]

@@ -1,4 +1,4 @@
-extends Control
+extends ScrollContainer
 
 enum PluginState {
 	_SIZE
@@ -49,6 +49,10 @@ func _ready():
 
 	status_bar.text = "Establishing connection"
 	_socket.connect_to_url(websocket_url)
+	pass
+
+func _process(_delta):
+	# size = get_window().size
 	pass
 
 func _physics_process(_delta):
